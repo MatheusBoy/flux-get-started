@@ -209,9 +209,6 @@ spec:
             - --git-url=git@github.com:MatheusBoy/flux-get-started
             - --git-branch=master
             - --git-path=releases
-            - --git-readonly=false
-            - --git-user=MatheusBoy
-            - --git-email=MatheusBoy@users.noreply.github.com
             - --git-verify-signatures=false
             - --git-set-author=false
             - --git-poll-interval=1m
