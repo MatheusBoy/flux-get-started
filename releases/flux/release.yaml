@@ -1,0 +1,311 @@
+---
+# Source: flux/templates/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: flux-git-deploy
+  namespace: flux
+type: Opaque
+---
+# Source: flux/templates/kube.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: flux-kube-config
+  namespace: flux
+data:
+  config: |
+    apiVersion: v1
+    clusters: []
+    contexts:
+    - context:
+        cluster: ""
+        namespace: default
+        user: ""
+      name: default
+    current-context: default
+    kind: Config
+    preferences: {}
+    users: []
+---
+# Source: flux/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: flux
+  namespace: flux
+  labels:
+    app: flux
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+---
+# Source: flux/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: flux
+  labels:
+    app: flux
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+  - nonResourceURLs:
+      - "*"
+    verbs:
+      - "*"
+---
+# Source: flux/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: flux
+  labels:
+    app: flux
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux
+subjects:
+  - name: flux
+    namespace: "flux"
+    kind: ServiceAccount
+---
+# Source: flux/templates/memcached.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flux-memcached
+  labels:
+    app: flux-memcached
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+spec:
+  ports:
+    - port: 11211
+      targetPort: memcached
+      protocol: TCP
+      name: memcached
+  selector:
+    app: flux-memcached
+    release: flux
+---
+# Source: flux/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flux
+  namespace: flux
+  labels:
+    app: flux
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3030
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: flux
+    release: flux
+---
+# Source: flux/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: flux
+    meta.helm.sh/release-namespace: flux
+  creationTimestamp: "2021-03-17T16:52:45Z"
+  generation: 1
+  labels:
+    app: flux
+    app.kubernetes.io/managed-by: Helm
+    chart: flux-1.6.2
+    heritage: Helm
+    release: flux
+  name: flux
+  namespace: flux
+  resourceVersion: "717"
+  uid: 50de1801-9f1f-4d9a-b6b4-42b539e8afde
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: flux
+      release: flux
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flux
+        release: flux
+    spec:
+      containers:
+      - args:
+        - --log-format=fmt
+        - --ssh-keygen-dir=/var/fluxd/keygen
+        - --ssh-keygen-format=RFC4716
+        - --k8s-secret-name=flux-git-deploy
+        - --memcached-hostname=flux-memcached
+        - --sync-state=git
+        - --memcached-service=
+        - --git-url=git@github.com:MatheusBoy/flux-get-started
+        - --git-branch=master
+        - --git-path=releases
+        - --git-readonly=false
+        - --git-user=Weave Flux
+        - --git-email=support@weave.works
+        - --git-verify-signatures=false
+        - --git-set-author=false
+        - --git-poll-interval=5m
+        - --git-timeout=20s
+        - --sync-interval=5m
+        - --git-ci-skip=false
+        - --automation-interval=5m
+        - --registry-rps=200
+        - --registry-burst=125
+        - --registry-trace=false
+        env:
+        - name: KUBECONFIG
+          value: /root/.kubectl/config
+        image: docker.io/fluxcd/flux:1.21.2
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/flux/v6/identity.pub
+            port: 3030
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: flux
+        ports:
+        - containerPort: 3030
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /api/flux/v6/identity.pub
+            port: 3030
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /root/.kubectl
+          name: kubedir
+        - mountPath: /etc/fluxd/ssh
+          name: git-key
+          readOnly: true
+        - mountPath: /var/fluxd/keygen
+          name: git-keygen
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: flux
+      serviceAccountName: flux
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: flux-kube-config
+        name: kubedir
+      - name: git-key
+        secret:
+          defaultMode: 256
+          secretName: flux-git-deploy
+      - emptyDir:
+          medium: Memory
+        name: git-keygen
+---
+# Source: flux/templates/memcached.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flux-memcached
+  namespace: flux
+  labels:
+    app.kubernetes.io/name: flux-memcached
+    app.kubernetes.io/instance: flux-memcached
+    app: flux-memcached
+    chart: flux-1.4.1
+    release: flux
+    heritage: Tiller
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: flux-memcached
+      release: flux
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: flux-memcached
+        app.kubernetes.io/instance: flux-memcached
+        app: flux-memcached
+        release: flux
+    spec:
+      priorityClassName: high-priority
+      imagePullSecrets:
+        - name: "docker-registry"
+      containers:
+        - name: memcached
+          image: memcached:1.5.20
+          imagePullPolicy: IfNotPresent
+          args:
+            - -m 512 # Maximum memory to use, in megabytes. 64MB is default.
+            - -p 11211 # Default port, but being explicit is nice.
+            - -I 5m #  Maximum size for one item
+          ports:
+            - name: memcached
+              containerPort: 11211
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsGroup: 11211
+            runAsUser: 11211
+
+      nodeSelector:
+        beta.kubernetes.io/os: linux
