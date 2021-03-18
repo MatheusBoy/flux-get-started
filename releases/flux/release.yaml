@@ -1,5 +1,225 @@
 ---
-# Source: flux/templates/secret.yaml
+# The service account, cluster roles, and cluster role binding are
+# only needed for Kubernetes with role-based access control (RBAC).
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    name: flux
+  name: flux
+  namespace: flux
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  labels:
+    name: flux
+  name: flux
+rules:
+  - apiGroups: ['*']
+    resources: ['*']
+    verbs: ['*']
+  - nonResourceURLs: ['*']
+    verbs: ['*']
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    name: flux
+  name: flux
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: flux
+subjects:
+  - kind: ServiceAccount
+    name: flux
+    namespace: flux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flux
+  namespace: flux
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: flux
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "3031" # tell prometheus to scrape /metrics endpoint's port.
+      labels:
+        name: flux
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      serviceAccountName: flux
+      volumes:
+      - name: git-key
+        secret:
+          secretName: flux-git-deploy
+          defaultMode: 0400 # when mounted read-only, we won't be able to chmod
+
+      # This is a tmpfs used for generating SSH keys. In K8s >= 1.10,
+      # mounted secrets are read-only, so we need a separate volume we
+      # can write to.
+      - name: git-keygen
+        emptyDir:
+          medium: Memory
+
+      # The following volume is for using a customised known_hosts
+      # file, which you will need to do if you host your own git
+      # repo rather than using github or the like. You'll also need to
+      # mount it into the container, below. See
+      # https://docs.fluxcd.io/en/latest/guides/use-private-git-host
+      # - name: ssh-config
+      #   configMap:
+      #     name: flux-ssh-config
+
+      # The following volume is for using a customised .kube/config,
+      # which you will need to do if you wish to have a different
+      # default namespace. You will also need to provide the configmap
+      # with an entry for `config`, and uncomment the volumeMount and
+      # env entries below.
+      # - name: kubeconfig
+      #   configMap:
+      #     name: flux-kubeconfig
+
+      # The following volume is used to import GPG keys (for signing
+      # and verification purposes). You will also need to provide the
+      # secret with the keys, and uncomment the volumeMount and args
+      # below.
+      # - name: gpg-keys
+      #   secret:
+      #     secretName: flux-gpg-keys
+      #     defaultMode: 0400
+
+      containers:
+      - name: flux
+        # There are no ":latest" images for flux. Find the most recent
+        # release or image version at https://hub.docker.com/r/fluxcd/flux/tags
+        # and replace the tag here.
+        image: docker.io/fluxcd/flux:1.21.1
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+        ports:
+        - containerPort: 3030 # informational
+        livenessProbe:
+          httpGet:
+            port: 3030
+            path: /api/flux/v6/identity.pub
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            port: 3030
+            path: /api/flux/v6/identity.pub
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: git-key
+          mountPath: /etc/fluxd/ssh # to match location given in image's /etc/ssh/config
+          readOnly: true # this will be the case perforce in K8s >=1.10
+        - name: git-keygen
+          mountPath: /var/fluxd/keygen # to match location given in image's /etc/ssh/config
+
+        # Include this if you need to mount a customised known_hosts
+        # file; you'll also need the volume declared above.
+        # - name: ssh-config
+        #   mountPath: /root/.ssh
+
+        # Include this and the volume "kubeconfig" above, and the
+        # environment entry "KUBECONFIG" below, to override the config
+        # used by kubectl.
+        # - name: kubeconfig
+        #   mountPath: /etc/fluxd/kube
+
+        # Include this to point kubectl at a different config; you
+        # will need to do this if you have mounted an alternate config
+        # from a configmap, as in commented blocks above.
+        # env:
+        # - name: KUBECONFIG
+        #   value: /etc/fluxd/kube/config
+
+        # Include this and the volume "gpg-keys" above, and the
+        # args below.
+        # - name: gpg-keys
+        #   mountPath: /root/gpg-import
+        #   readOnly: true
+
+        # Include this if you want to supply HTTP basic auth credentials for git
+        # via the `GIT_AUTHUSER` and `GIT_AUTHKEY` environment variables using a
+        # secret.
+        # envFrom:
+        # - secretRef:
+        #     name: flux-git-auth
+
+        args:
+
+        # If you deployed memcached in a different namespace to flux,
+        # or with a different service name, you can supply these
+        # following two arguments to tell fluxd how to connect to it.
+        # - --memcached-hostname=memcached.default.svc.cluster.local
+
+        # Use the memcached ClusterIP service name by setting the
+        # memcached-service to string empty
+        - --memcached-service=
+
+        # This must be supplied, and be in the tmpfs (emptyDir)
+        # mounted above, for K8s >= 1.10
+        - --ssh-keygen-dir=/var/fluxd/keygen
+
+        # Replace the following URL to change the Git repository used by Flux.
+        # HTTP basic auth credentials can be supplied using environment variables:
+        # https://$(GIT_AUTHUSER):$(GIT_AUTHKEY)@github.com/user/repository.git
+        - --git-url=git@github.com:MatheusBoy/fluxMigration
+        - --git-branch=master
+        - --git-path=releases
+        - --git-label=flux
+        - --git-user=MatheusBoy
+        - --git-email=MatheusBoy@users.noreply.github.com
+
+        # Include these two to enable git commit signing
+        # - --git-gpg-key-import=/root/gpg-import
+        # - --git-signing-key=<key id>
+        
+        # Include this to enable git signature verification
+        # - --git-verify-signatures
+
+        # Tell flux it has readonly access to the repo (default `false`)
+        # - --git-readonly
+
+        # Instruct flux where to put sync bookkeeping (default "git", meaning use a tag in the upstream git repo)
+        # - --sync-state=git
+
+        # Include these next two to connect to an "upstream" service
+        # (e.g., Weave Cloud). The token is particular to the service.
+        # - --connect=wss://cloud.weave.works/api/flux
+        # - --token=abc123abc123abc123abc123
+
+        # Enable manifest generation (default `false`)
+        # - --manifest-generation=false
+
+        # Serve /metrics endpoint at different port;
+        # make sure to set prometheus' annotation to scrape the port value.
+        - --listen-metrics=:3031
+
+      # Optional DNS settings, configuring the ndots option may resolve
+      # nslookup issues on some Kubernetes setups.
+      # dnsPolicy: "None"
+      # dnsConfig:
+      #   options:
+      #     - name: ndots
+      #       value: "1"
+---
 apiVersion: v1
 kind: Secret
 metadata:
@@ -7,288 +227,50 @@ metadata:
   namespace: flux
 type: Opaque
 ---
-# Source: flux/templates/kube.yaml
-apiVersion: v1
-kind: ConfigMap
+# memcached deployment used by Flux to cache
+# container image metadata.
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: flux-kube-config
+  name: memcached
   namespace: flux
-data:
-  config: |
-    apiVersion: v1
-    clusters: []
-    contexts:
-    - context:
-        cluster: ""
-        namespace: default
-        user: ""
-      name: default
-    current-context: default
-    kind: Config
-    preferences: {}
-    users: []
----
-# Source: flux/templates/serviceaccount.yaml
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: flux
-  namespace: flux
-  labels:
-    app: flux
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
----
-# Source: flux/templates/rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: flux
-  labels:
-    app: flux
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
-rules:
-  - apiGroups:
-      - "*"
-    resources:
-      - "*"
-    verbs:
-      - "*"
-  - nonResourceURLs:
-      - "*"
-    verbs:
-      - "*"
----
-# Source: flux/templates/rbac.yaml
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: flux
-  labels:
-    app: flux
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: flux
-subjects:
-  - name: flux
-    namespace: "flux"
-    kind: ServiceAccount
----
-# Source: flux/templates/memcached.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: flux-memcached
-  labels:
-    app: flux-memcached
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
 spec:
-  ports:
-    - port: 11211
-      targetPort: memcached
-      protocol: TCP
+  replicas: 1
+  selector:
+    matchLabels:
       name: memcached
-  selector:
-    app: flux-memcached
-    release: flux
+  template:
+    metadata:
+      labels:
+        name: memcached
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      containers:
+      - name: memcached
+        image: memcached:1.5.20
+        imagePullPolicy: IfNotPresent
+        args:
+        - -m 512   # Maximum memory to use, in megabytes
+        - -I 5m    # Maximum size for one item
+        - -p 11211 # Default port
+        # - -vv    # Uncomment to get logs of each request and response.
+        ports:
+        - name: clients
+          containerPort: 11211
+        securityContext:
+          runAsUser: 11211
+          runAsGroup: 11211
+          allowPrivilegeEscalation: false
 ---
-# Source: flux/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: flux
+  name: memcached
   namespace: flux
-  labels:
-    app: flux
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
 spec:
-  type: ClusterIP
   ports:
-    - port: 3030
-      targetPort: http
-      protocol: TCP
-      name: http
+    - name: memcached
+      port: 11211
   selector:
-    app: flux
-    release: flux
----
-# Source: flux/templates/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flux
-  namespace: flux
-  labels:
-    app.kubernetes.io/name: flux
-    app.kubernetes.io/instance: flux
-    app: flux
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: flux
-      release: flux
-  template:
-    metadata:
-      annotations:
-        prometheus.io/scrape: "true"
-      labels:
-        app.kubernetes.io/name: flux
-        app.kubernetes.io/instance: flux
-        app: flux
-        release: flux
-    spec:
-      serviceAccountName: flux
-      priorityClassName: high-priority
-      volumes:
-        - name: kubedir
-          configMap:
-            name: flux-kube-config
-        - name: git-key
-          secret:
-            secretName: flux-git-deploy
-            defaultMode: 0400
-        - name: git-keygen
-          emptyDir:
-            medium: Memory
-      imagePullSecrets:
-        - name: "docker-registry"
-      containers:
-        - name: flux
-          image: "docker.io/fluxcd/flux:1.20.1"
-          imagePullPolicy: IfNotPresent
-          ports:
-            - name: http
-              containerPort: 3030
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              port: 3030
-              path: /api/flux/v6/identity.pub
-            initialDelaySeconds: 5
-            timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              port: 3030
-              path: /api/flux/v6/identity.pub
-            initialDelaySeconds: 5
-            timeoutSeconds: 5
-          volumeMounts:
-            - name: kubedir
-              mountPath: /root/.kubectl
-            - name: git-key
-              mountPath: /etc/fluxd/ssh
-              readOnly: true
-            - name: git-keygen
-              mountPath: /var/fluxd/keygen
-          env:
-            - name: KUBECONFIG
-              value: /root/.kubectl/config
-          args:
-             - --log-format=fmt
-             - --ssh-keygen-dir=/var/fluxd/keygen
-             - --ssh-keygen-format=RFC4716
-             - --k8s-secret-name=flux-git-deploy
-             - --memcached-hostname=flux-memcached
-             - --sync-state=git
-             - --memcached-service=
-             - --git-url=git@github.com:MatheusBoy/flux-get-started
-             - --git-branch=master
-             - --git-path=releases
-             - --git-readonly=false
-             - --git-user=CD Bot
-             - --git-email=matheusboy@users.noreply.github.com
-             - --git-verify-signatures=false
-             - --git-set-author=false
-             - --git-poll-interval=1m
-             - --git-timeout=20s
-             - --sync-interval=2m
-             - --git-ci-skip=true
-             - --automation-interval=2m
-             - --registry-rps=200
-             - --registry-burst=125
-             - --registry-trace=false
-             - --manifest-generation=true
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
-
-      nodeSelector:
-        beta.kubernetes.io/os: linux
----
-# Source: flux/templates/memcached.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: flux-memcached
-  namespace: flux
-  labels:
-    app.kubernetes.io/name: flux-memcached
-    app.kubernetes.io/instance: flux-memcached
-    app: flux-memcached
-    chart: flux-1.4.1
-    release: flux
-    heritage: Tiller
-spec:
-  replicas: 1
-  strategy:
-    type: Recreate
-  selector:
-    matchLabels:
-      app: flux-memcached
-      release: flux
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/name: flux-memcached
-        app.kubernetes.io/instance: flux-memcached
-        app: flux-memcached
-        release: flux
-    spec:
-      priorityClassName: high-priority
-      imagePullSecrets:
-        - name: "docker-registry"
-      containers:
-        - name: memcached
-          image: memcached:1.5.20
-          imagePullPolicy: IfNotPresent
-          args:
-            - -m 512 # Maximum memory to use, in megabytes. 64MB is default.
-            - -p 11211 # Default port, but being explicit is nice.
-            - -I 5m #  Maximum size for one item
-          ports:
-            - name: memcached
-              containerPort: 11211
-          resources:
-            requests:
-              cpu: 50m
-              memory: 128Mi
-            limits:
-              cpu: 100m
-              memory: 128Mi
-
-          securityContext:
-            allowPrivilegeEscalation: false
-            runAsGroup: 11211
-            runAsUser: 11211
-
-      nodeSelector:
-        beta.kubernetes.io/os: linux
+    name: memcached
