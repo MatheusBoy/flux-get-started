@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: docker.io/matheusboy/redis:1.0.0
+        image: docker.io/matheusboy/redis:2.0.1
         imagePullPolicy: IfNotPresent
         resources:
           requests:
