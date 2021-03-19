@@ -8,7 +8,7 @@ spec:
   # The interval at wich to check the upstream for updates
   interval: 10m
   # The repository URL, a valid URL contains at least a protocol and host
-  url: https://bitnami-labs.github.io/
+  url: https://bitnami-labs.github.io/sealed-secrets
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
