@@ -5,7 +5,7 @@ metadata:
   name: redis
   namespace: redis
   annotations:
-    fluxcd.io/tag.redis: glob:1.0.*
+    fluxcd.io/tag.redis: glob:2.0.*
 spec:
   replicas: 1
   selector:
