@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tetris 
+  namespace: tetris
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: tetris
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        name: tetris
+    spec:
+      - name: tetris
+        image: docker.io/matheusboy/tetris:latest
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
