@@ -23,5 +23,5 @@ spec:
       chart: ./charts/ghost
       sourceRef:
         kind: GitRepository
-        name: charts
-        namespace: default
+        name: my-charts
+        namespace: flux-system
