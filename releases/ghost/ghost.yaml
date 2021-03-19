@@ -1,4 +1,16 @@
 ---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: charts
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  ref:
+    branch: fluxV2
+  url: ssh://git@github.com/MatheusBoy/flux-get-started
+
+---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -11,5 +23,5 @@ spec:
       chart: ./charts/ghost
       sourceRef:
         kind: GitRepository
-        name: flux-system
+        name: charts
         namespace: default
