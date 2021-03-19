@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tetris 
-  namespace: tetris
+  name: redis 
+  namespace: redis
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: tetris
+      name: redis
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        name: tetris
+        name: redis
     spec:
-      - name: tetris
-        image: docker.io/matheusboy/tetris:latest
+      - name: redis
+        image: docker.io/matheusboy/redis:latest
         imagePullPolicy: IfNotPresent
         resources:
           requests:
