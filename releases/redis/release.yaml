@@ -15,10 +15,11 @@ spec:
       labels:
         name: redis
     spec:
-      - name: redis
-        image: docker.io/matheusboy/redis:latest
-        imagePullPolicy: IfNotPresent
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
+        containers:
+          - name: redis
+            image: docker.io/matheusboy/redis:latest
+            imagePullPolicy: IfNotPresent
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
