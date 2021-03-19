@@ -13,19 +13,3 @@ spec:
         kind: GitRepository
         name: flux-system
         namespace: default
-  values:
-    image:
-      repository: bitnami/ghost
-      tag: 3.1.1-debian-9-r0
-    persistence:
-      enabled: false
-    resources:
-      requests:
-        memory: 32Mi
-        cpu: 10m
-    service:
-      type: ClusterIP
-    mariadb:
-      master:
-        persistence:
-          enabled: false
