@@ -1,4 +1,4 @@
-/releases/flux
-/releases/redis
-/releases/ghost
-/releases/namespaces
+/flux
+/redis
+/ghost
+/namespaces
