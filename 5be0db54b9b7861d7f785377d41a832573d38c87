@@ -1,0 +1,1 @@
+{"jobID":"d485f8eb-5502-c32d-9f72-a1b218a77e7c","spec":{"type":"policy","cause":{"Message":"","User":"MatheusBoy \u003cmatheusarantes@wine.com.br\u003e"},"spec":{"redis:deployment/redis":{"add":{"tag.redis":"glob:1.0.*"},"remove":{}}}},"result":null}
