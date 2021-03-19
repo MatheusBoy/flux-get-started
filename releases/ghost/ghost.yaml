@@ -1,18 +1,18 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: ghost
   namespace: demo
-  annotations:
-    fluxcd.io/automated: "false"
-    fluxcd.io/tag.chart-image: glob:3.1.1-debian-9-*
 spec:
   releaseName: ghost
   chart:
-    git: ssh://git@github.com/fluxcd/flux-get-started
-    ref: master
-    path: charts/ghost
+    spec:
+      chart: ./charts/ghost
+      sourceRef:
+        kind: GitRepository
+        name: flux-system
+        namespace: default
   values:
     image:
       repository: bitnami/ghost
