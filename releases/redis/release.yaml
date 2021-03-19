@@ -1,8 +1,11 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: redis 
+  name: redis
   namespace: redis
+  annotations:
+    fluxcd.io/tag.redis: glob:1.0.*
 spec:
   replicas: 1
   selector:
@@ -15,11 +18,11 @@ spec:
       labels:
         name: redis
     spec:
-        containers:
-          - name: redis
-            image: docker.io/matheusboy/redis:1.0.0
-            imagePullPolicy: IfNotPresent
-            resources:
-              requests:
-                cpu: 50m
-                memory: 64Mi
+      containers:
+      - name: redis
+        image: docker.io/matheusboy/redis:1.0.0
+        imagePullPolicy: IfNotPresent
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
