@@ -187,6 +187,14 @@ spec:
         - --git-user=MatheusBoy
         - --git-email=MatheusBoy@users.noreply.github.com
 
+        - --git-poll-interval=1m
+        - --git-timeout=20s
+        - --sync-interval=2m
+        - --git-ci-skip=true
+        - --automation-interval=2m
+        - --registry-rps=200
+        - --registry-burst=125
+        - --registry-trace=false
         # Include these two to enable git commit signing
         # - --git-gpg-key-import=/root/gpg-import
         # - --git-signing-key=<key id>
