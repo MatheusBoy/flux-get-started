@@ -7,7 +7,7 @@ metadata:
 spec:
   interval: 1m
   ref:
-    branch: fluxV2
+    branch: master
   secretRef:
     name: flux-system
   url: ssh://git@github.com/MatheusBoy/flux-get-started
@@ -19,7 +19,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m
-  path: ./releases
+  path: ./
   prune: true
   sourceRef:
     kind: GitRepository
