@@ -2,7 +2,7 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: GitRepository
 metadata:
-  name: charts
+  name: flux-system
   namespace: flux-system
 spec:
   interval: 10m0s
@@ -23,5 +23,5 @@ spec:
       chart: ./charts/ghost
       sourceRef:
         kind: GitRepository
-        name: my-charts
+        name: flux-system
         namespace: flux-system
