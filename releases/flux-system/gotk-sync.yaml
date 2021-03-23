@@ -11,10 +11,6 @@ spec:
   secretRef:
     name: flux-system
   url: ssh://git@github.com/MatheusBoy/flux-get-started
-  ignore: |
-    charts/
-    workloads/
-    .circleci/
 ---
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
