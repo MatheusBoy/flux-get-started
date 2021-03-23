@@ -5,7 +5,9 @@ metadata:
   name: ghost
   namespace: demo
 spec:
+  interval: 5m
   releaseName: ghost
+  targetNamespace: demo
   chart:
     spec:
       chart: ./charts/ghost
@@ -13,6 +15,7 @@ spec:
         kind: GitRepository
         name: flux-system
         namespace: flux-system
+      interval: 1m
   values:
     image:
       repository: bitnami/ghost
