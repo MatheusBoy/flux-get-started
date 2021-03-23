@@ -13,7 +13,7 @@ spec:
       chart: ./charts/ghost
       sourceRef:
         kind: GitRepository
-        name: flux-system
+        name: releases-source
         namespace: flux-system
       interval: 1m
   values:
