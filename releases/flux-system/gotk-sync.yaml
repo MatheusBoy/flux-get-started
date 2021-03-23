@@ -18,8 +18,8 @@ metadata:
   name: flux-system
   namespace: flux-system
 spec:
-  interval: 1m
-  path: ./
+  interval: 10m0s
+  path: ./releases
   prune: true
   sourceRef:
     kind: GitRepository
