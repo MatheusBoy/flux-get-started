@@ -10,7 +10,7 @@ spec:
   targetNamespace: demo
   chart:
     spec:
-      chart: ./charts/ghost
+      chart: .releases/charts/ghost
       sourceRef:
         kind: GitRepository
         name: releases-source
