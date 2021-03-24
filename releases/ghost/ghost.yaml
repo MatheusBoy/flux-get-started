@@ -6,6 +6,8 @@ metadata:
 spec:
   interval: 1m
   url: ssh://git@github.com/MatheusBoy/flux-get-started
+  secretRef:
+    name: ssh-credentials
   ref:
     branch: master
   ignore: |
