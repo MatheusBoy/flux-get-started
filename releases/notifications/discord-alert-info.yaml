@@ -21,4 +21,6 @@ spec:
       namespace: sealed-secrets
     - kind: ImageUpdateAutomation
       name: '*'
+      exclusionList:
+        - "no updates made"
    
