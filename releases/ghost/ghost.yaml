@@ -22,7 +22,7 @@ metadata:
   name: ghost
   namespace: demo
 spec:
-  interval: 1m
+  interval: 5m
   releaseName: ghost
   targetNamespace: demo
   chart:

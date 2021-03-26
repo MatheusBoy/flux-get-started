@@ -5,7 +5,7 @@ metadata:
   name: grafana
   namespace: monitoring
 spec:
-  interval: 1m
+  interval: 5m
   releaseName: grafana
   targetNamespace: monitoring
 
