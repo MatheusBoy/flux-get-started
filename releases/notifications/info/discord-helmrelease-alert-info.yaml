@@ -8,8 +8,6 @@ spec:
     name: discord
   eventSeverity: info
   eventSources:
-    - kind: Kustomization
-      name: '*'
     - kind: HelmRelease
       name: '*'
       namespace: demo
@@ -19,8 +17,3 @@ spec:
     - kind: HelmRelease
       name: '*'
       namespace: sealed-secrets
-    - kind: ImageUpdateAutomation
-      name: '*'
-  exclusionList:
-    - "no updates made"
-
