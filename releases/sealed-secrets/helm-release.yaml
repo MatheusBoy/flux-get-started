@@ -5,7 +5,7 @@ metadata:
   name: sealed-secrets-controller
   namespace: sealed-secrets
 spec:
-  interval: 5m
+  interval: 1m
   releaseName: sealed-secrets-controller
   targetNamespace: sealed-secrets
   chart:
