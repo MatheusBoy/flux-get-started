@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: redis
-        image: docker.io/matheusboy/redis:2.0.5 # {"$imagepolicy": "flux-system:redis"}
+        image: docker.io/matheusboy/redis:2.0.6 # {"$imagepolicy": "flux-system:redis"}
         imagePullPolicy: IfNotPresent
         resources:
           requests:
