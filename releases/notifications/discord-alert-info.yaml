@@ -19,4 +19,6 @@ spec:
     - kind: HelmRelease
       name: '*'
       namespace: sealed-secrets
+    - kind: ImageUpdateAutomation
+      name: '*'
    
