@@ -28,6 +28,7 @@ spec:
   chart:
     spec:
       chart: ./charts/ghost
+      version: "9.0.4"
       sourceRef:
         kind: GitRepository
         name: podinfo
