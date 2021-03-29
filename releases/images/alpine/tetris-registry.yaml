@@ -2,9 +2,9 @@
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
-  name: tetris
+  name: alpine
   namespace: flux-system
 spec:
-  image: docker.io/matheusboy/tetris
+  image: docker.io/matheusboy/alpine
   interval: 1m0s
 
