@@ -1,25 +1,29 @@
-apiVersion: apps/v1
-kind: Deployment
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
 metadata:
   name: redis
-  namespace: redis
+  namespace: demo
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      name: redis
-  strategy:
-    type: Recreate
-  template:
-    metadata:
-      labels:
-        name: redis
+  interval: 5m
+  releaseName: redis
+  targetNamespace: redis
+  chart:
     spec:
-      containers:
-      - name: redis
-        image: docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
-        imagePullPolicy: IfNotPresent
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
+      chart: ./charts/redis
+      sourceRef:
+        kind: GitRepository
+        name: podinfo
+        namespace: flux-system
+      interval: 1m
+  values:
+    image:  docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
+    imagePullPolicy: IfNotPresent
+    imagePullSecrets: []
+    resources: 
+      limits:
+        cpu: 50m
+        memory: 64Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
