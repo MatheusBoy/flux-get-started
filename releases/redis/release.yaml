@@ -4,7 +4,7 @@ metadata:
   name: redis
   namespace: redis
 spec:
-  interval: 5m
+  interval: 1m
   releaseName: redis
   targetNamespace: redis
   chart:
