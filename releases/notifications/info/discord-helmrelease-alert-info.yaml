@@ -17,6 +17,3 @@ spec:
     - kind: HelmRelease
       name: '*'
       namespace: sealed-secrets
-    - kind: HelmRelease
-      name: '*'
-      namespace: alpine
