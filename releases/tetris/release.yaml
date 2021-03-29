@@ -1,22 +1,22 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: redis
-  namespace: redis
+  name: tetris
+  namespace: tetris
 spec:
   interval: 1m
-  releaseName: redis
-  targetNamespace: redis
+  releaseName: tetris
+  targetNamespace: tetris
   chart:
     spec:
-      chart: ./charts/redis
+      chart: ./charts/tetris
       sourceRef:
         kind: GitRepository
         name: podinfo
         namespace: flux-system
       interval: 1m
   values:
-    image: docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
+    image: docker.io/matheusboy/tetris:1.0.1 # {"$imagepolicy": "flux-system:tetris"}
     imagePullPolicy: IfNotPresent
     imagePullSecrets: []
     resources:

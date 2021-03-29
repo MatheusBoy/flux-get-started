@@ -2,9 +2,9 @@
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
-  name: redis
+  name: tetris
   namespace: flux-system
 spec:
-  image: docker.io/matheusboy/redis
+  image: docker.io/matheusboy/tetris
   interval: 1m0s
 

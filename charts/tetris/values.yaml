@@ -1,11 +1,11 @@
 nameOverride: ""
-fullnameOverride: "redis"
+fullnameOverride: "tetris"
 
 #########
 ## APLICATION
 ######
 
-image:  docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
+image:  docker.io/matheusboy/tetris:1.0.1 # {"$imagepolicy": "flux-system:tetris"}
 imagePullPolicy: IfNotPresent
 imagePullSecrets: []
 
