@@ -17,8 +17,6 @@ spec:
       interval: 1m
   values:
     image: docker.io/matheusboy/alpine:1.0.1 # {"$imagepolicy": "flux-system:alpine"}
-    imagePullPolicy: IfNotPresent
-    imagePullSecrets: []
     resources:
       limits:
         cpu: 50m
