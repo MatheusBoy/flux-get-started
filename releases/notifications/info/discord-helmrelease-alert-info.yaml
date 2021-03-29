@@ -10,3 +10,13 @@ spec:
   eventSources:
     - kind: HelmRelease
       name: '*'
+      namespace: demo
+    - kind: HelmRelease
+      name: '*'
+      namespace: monitoring
+    - kind: HelmRelease
+      name: '*'
+      namespace: sealed-secrets
+    - kind: HelmRelease
+      name: '*'
+      namespace: alpine
