@@ -1,4 +1,3 @@
----
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
@@ -17,10 +16,10 @@ spec:
         namespace: flux-system
       interval: 1m
   values:
-    image:  docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
+    image: docker.io/matheusboy/redis:2.0.9 # {"$imagepolicy": "flux-system:redis"}
     imagePullPolicy: IfNotPresent
     imagePullSecrets: []
-    resources: 
+    resources:
       limits:
         cpu: 50m
         memory: 64Mi
