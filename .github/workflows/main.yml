@@ -3,21 +3,21 @@ on:
   push:
     branches:
       - image-updates
-      - '!master'
 jobs:
   pull-request:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - name: pull-request
-      uses: peter-evans/create-pull-request@v3
+      uses: repo-sync/pull-request@v2
       with:
-        base: master
-        token: ${{ secrets.PAT }}
-        branch: image-updates
-        title: "Image Update - ${{ github.ref }}"
-        body: |
-          "Image from commit - ${{ github.sha }}"
-        labels: "Image Update"
-        assignees: ${{ github.actor }}
-        reviewers: "MatheusBoy"
+        source_branch: ""                                     # If blank, default: triggered branch
+        destination_branch: "master"                          # If blank, default: master
+        pr_title: "Pulling ${{ github.ref }} into master"     # Title of pull request
+        pr_body: "Image Update from commit ${{ github.sha }}" # Full markdown support, requires pr_title to be set
+        pr_reviewer: MatheusBoy                               # Comma-separated list (no spaces)
+        pr_assignee: fluxcdbot                                # Comma-separated list (no spaces)
+        pr_label: "Image-Update"                              # Comma-separated list (no spaces)
+        pr_draft: false                                       # Creates pull request as draft
+        pr_allow_empty: false                                 # Creates pull request even if there are no changes
+        github_token: ${{ secrets.PAT }} 
