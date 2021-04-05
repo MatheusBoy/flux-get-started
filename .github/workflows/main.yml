@@ -3,19 +3,17 @@ on:
   push:
     branches:
       - image-updates
+    
 jobs:
   createPullRequest:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.PAT }}
-          commit-message: Update report
-          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          signoff: false
+          commit-message: 'Image Update ${{ github.sha }}'
           base: master
           branch: image-updates
           delete-branch: true
@@ -24,12 +22,4 @@ jobs:
             Image Update
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
-          team-reviewers: |
-            owners
-            maintainers
           draft: false
-
-      - name: Check outputs
-        run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
