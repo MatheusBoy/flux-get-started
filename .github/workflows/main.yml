@@ -4,15 +4,20 @@ on:
     branches:
       - image-updates
 jobs:
-  auto-pull-request:
-    name: PullRequestAction
+  pull-request:
     runs-on: ubuntu-latest
     steps:
-      - name: pull-request-action
-        uses: vsoch/pull-request-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
-          PULL_REQUEST_BRANCH: "master"
-          PULL_REQUEST_TITLE: "Image Update - ${{ github.sha }}"
-          PULL_REQUEST_ASSIGNEES: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          PULL_REQUEST_REVIEWERS: MatheusBoy <MatheusBoy@users.noreply.github.com>
+    - uses: actions/checkout@v2
+    - name: pull-request
+      uses: repo-sync/pull-request@v2
+      with:
+        source_branch: ""                                     # If blank, default: triggered branch
+        destination_branch: "master"                          # If blank, default: master
+        pr_title: "Pulling ${{ github.ref }} into master"     # Title of pull request
+        pr_body: "Image Update from commit ${{ github.sha }}" # Full markdown support, requires pr_title to be set
+        pr_reviewer: "MatheusBoy"                             # Comma-separated list (no spaces)
+        pr_assignee: "fluxcdbot"                              # Comma-separated list (no spaces)
+        pr_label: "Image-Update"                              # Comma-separated list (no spaces)
+        pr_draft: false                                       # Creates pull request as draft
+        pr_allow_empty: false                                 # Creates pull request even if there are no changes
+        github_token: ${{ secrets.PAT }}
