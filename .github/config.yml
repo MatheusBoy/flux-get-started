@@ -1,4 +1,8 @@
 name: PR-Generator
+on:
+  push:
+    branches:
+      - image-updates
 jobs:
   createPullRequest:
     runs-on: ubuntu-latest
