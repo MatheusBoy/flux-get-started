@@ -26,10 +26,9 @@ jobs:
           delete-branch: true
           title: 'Image Update ${{ github.sha }}'
           labels: |
-            report
-            automated pr
+            Image Update
           assignees: ${{ github.actor }}
-          reviewers: MatheusBoy
+          reviewers: ${{ github.actor }}
           team-reviewers: |
             owners
             maintainers
