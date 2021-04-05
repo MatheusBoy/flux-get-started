@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - image-updates
+      - '!master'
 jobs:
   pull-request:
     runs-on: ubuntu-latest
