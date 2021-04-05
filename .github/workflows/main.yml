@@ -16,7 +16,7 @@ jobs:
           commit-message: 'Image Update ${{ github.sha }}'
           base: master
           branch: image-updates
-          delete-branch: true
+          delete-branch: false
           title: 'Image Update ${{ github.sha }}'
           labels: |
             Image Update
