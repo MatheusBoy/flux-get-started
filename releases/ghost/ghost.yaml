@@ -30,7 +30,7 @@ spec:
       chart: ./charts/ghost
       sourceRef:
         kind: GitRepository
-        name: podinfo
+        name: flux-system
         namespace: flux-system
       interval: 1m
   values:
