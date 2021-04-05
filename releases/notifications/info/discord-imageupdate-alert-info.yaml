@@ -12,4 +12,5 @@ spec:
       name: '*'
   exclusionList:
     - "no updates made"
+    - "object not found"
 
