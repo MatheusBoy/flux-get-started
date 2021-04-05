@@ -12,7 +12,7 @@ jobs:
       uses: peter-evans/create-pull-request@v3
       with:
         base: master
-        token: {{ secrets.PAT }}
+        token: ${{ secrets.PAT }}
         branch: image-updates
         title: "Image Update - ${{ github.ref }}"
         body: |
