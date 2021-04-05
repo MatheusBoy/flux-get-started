@@ -15,3 +15,4 @@ jobs:
           PULL_REQUEST_BRANCH: "master"
           PULL_REQUEST_TITLE: "Image Update - ${{ github.sha }}"
           PULL_REQUEST_ASSIGNEES: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          PULL_REQUEST_REVIEWERS: matheusboy
