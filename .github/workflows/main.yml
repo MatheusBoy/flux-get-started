@@ -14,6 +14,8 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: 'Image Update ${{ github.sha }}'
+          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           base: master
           branch: image-updates
           delete-branch: false
@@ -23,3 +25,8 @@ jobs:
           assignees: ${{ github.actor }}
           reviewers: ${{ github.actor }}
           draft: false
+
+      - name: Check outputs
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
