@@ -17,6 +17,8 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
+          push-to-fork: MatheusBoy/flux-get-started
+          base: master
           branch: image-updates
           delete-branch: true
           title: 'Image Update ${{ github.sha }}'
