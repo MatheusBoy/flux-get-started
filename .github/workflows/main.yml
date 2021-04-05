@@ -17,6 +17,7 @@ jobs:
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           signoff: false
           base: master
+          branch: image-updates
           delete-branch: true
           title: 'Image Update ${{ github.sha }}'
           labels: |
