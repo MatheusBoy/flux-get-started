@@ -1,0 +1,17 @@
+name: Pull Request on Branch Push
+on:
+  push:
+    branches:
+      - image-updates
+jobs:
+  auto-pull-request:
+    name: PullRequestAction
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull-request-action
+        uses: vsoch/pull-request-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          PULL_REQUEST_BRANCH: "master"
+          PULL_REQUEST_TITLE: "Image Update - ${{ github.sha }}"
+          PULL_REQUEST_ASSIGNEES: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
