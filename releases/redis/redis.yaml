@@ -23,3 +23,22 @@ spec:
           requests:
             cpu: 50m
             memory: 64Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: redis-svc
+  name: redis-svc
+spec:
+  ports:
+  - name: 80-8080
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: redis-svc
+  type: ClusterIP
+status:
+  loadBalancer: {}
