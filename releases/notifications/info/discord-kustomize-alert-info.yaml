@@ -1,11 +1,11 @@
 apiVersion: notification.toolkit.fluxcd.io/v1beta1
 kind: Alert
 metadata:
-  name: discord-kustomize-alert-info
+  name: my-webhook-kustomize-alert-info
   namespace: flux-system
 spec:
   providerRef:
-    name: discord
+    name: my-webhook
   eventSeverity: info
   eventSources:
     - kind: Kustomization

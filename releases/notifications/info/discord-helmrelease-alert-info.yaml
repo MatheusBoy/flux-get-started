@@ -1,11 +1,11 @@
 apiVersion: notification.toolkit.fluxcd.io/v1beta1
 kind: Alert
 metadata:
-  name: discord-helmrelease-alert-info
+  name: my-webhook-helmrelease-alert-info
   namespace: flux-system
 spec:
   providerRef:
-    name: discord
+    name: my-webhook
   eventSeverity: info
   eventSources:
     - kind: HelmRelease
