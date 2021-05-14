@@ -5,4 +5,4 @@ metadata:
   namespace: flux-system
 spec:
   type: generic
-  Address: http://127.0.0.1:5000/webhook
+  address: http://localhost:5000/webhook
